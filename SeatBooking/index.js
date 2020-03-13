@@ -1,21 +1,37 @@
 const container = document.querySelector(".container");
-const seats = document.querySelectorAll(".row .seats:not(.occupied)");
+const seats = document.querySelectorAll(".row .seat:not(.occupied)");
 const count = document.querySelector("#count");
 const price = document.querySelector("#price");
 const movieSelect = document.querySelector("#movie");
+
+popilationUI();
+
 let ticketPrice = +movieSelect.value;
 
-function updateSelectCount() {
-  const selectedSeat = container.querySelectorAll(".select");
-  const selectedSeatCount = selectedSeat.length;
+function popilationUI() {
+  const selectedSeats = JSON.parse(localStorage.getItem("listSelectSeats"));
 
-  count.innerText = selectedSeatCount;
-  price.innerText = selectedSeatCount * ticketPrice;
+  if (selectedSeats !== null && selectedSeats.length > 0) {
+    seats.forEach((seat, index) => {
+      if (selectedSeats.indexOf(index) > -1) {
+        seat.classList.add("select");
+      }
+    });
+  }
+
+  const selectionMovi = localStorage.getItem("indexSelectedMovie");
+  movieSelect.selectedIndex = selectionMovi;
+}
+
+function updateSelectedMovies(indexSelectedMovie, costSelectedMovie) {
+  localStorage.setItem("indexSelectedMovie", indexSelectedMovie);
+  localStorage.setItem("costSelectedMovie", costSelectedMovie);
 }
 
 movieSelect.addEventListener("change", e => {
   ticketPrice = e.target.value;
   updateSelectCount();
+  updateSelectedMovies(e.target.selectedIndex, e.target.value);
 });
 
 container.addEventListener("click", e => {
@@ -27,3 +43,17 @@ container.addEventListener("click", e => {
     updateSelectCount();
   }
 });
+
+function updateSelectCount() {
+  const selectedSeat = container.querySelectorAll(".select");
+  const selectedSeatCount = selectedSeat.length;
+  count.innerText = selectedSeatCount;
+  price.innerText = selectedSeatCount * ticketPrice;
+
+  const seatsSelectIndex = [...selectedSeat].map(item => {
+    return Array.from(seats).indexOf(item);
+  });
+  localStorage.setItem("listSelectSeats", JSON.stringify(seatsSelectIndex));
+}
+
+updateSelectCount();
